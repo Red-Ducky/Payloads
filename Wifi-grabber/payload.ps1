@@ -1,1 +1,5 @@
-for ($i=0) {echo "test $i; $i++}
+for ($i = 1; $i -le 10; $i++) {
+    echo $i
+    Start-Sleep -Seconds 1
+}
+exit
