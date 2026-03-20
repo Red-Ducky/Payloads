@@ -1,5 +1,10 @@
-for ($i = 1; $i -le 10; $i++) {
-    echo $i
-    Start-Sleep -Seconds 1
+Add-Type -AssemblyName System.Windows.Forms
+
+while ($true) {
+    [System.Windows.Forms.MessageBox]::Show(
+        "Coucou Mathéo !",
+        "Message",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Information
+    )
 }
-exit
