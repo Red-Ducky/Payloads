@@ -1,6 +1,8 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+Start-Sleep -Milliseconds 500
+
 $path = "$env:TEMP\screenshot.png"
 
 $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
