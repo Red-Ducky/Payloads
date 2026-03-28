@@ -30,3 +30,5 @@ Set-ItemProperty -Path $regPath -Name "HideIcons" -Value 1
 
 Stop-Process -Name explorer -Force
 Start-Process explorer
+Start-Sleep -Milliseconds 300
+exit
