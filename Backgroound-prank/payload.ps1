@@ -1,3 +1,17 @@
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+
+public class DPIAware {
+    [DllImport("user32.dll")]
+    public static extern bool SetProcessDpiAwarenessContext(IntPtr dpiFlag);
+
+    public static IntPtr PER_MONITOR_AWARE_V2 = new IntPtr(-4);
+}
+"@
+
+[DPIAware]::SetProcessDpiAwarenessContext([DPIAware]::PER_MONITOR_AWARE_V2) | Out-Null
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -24,11 +38,6 @@ public class Wallpaper {
     public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
 }
 "@
-
-$wallpaperStyleRegPath = "HKCU:\Control Panel\Desktop"
-
-Set-ItemProperty -Path $wallpaperStyleRegPath -Name WallpaperStyle -Value "10"
-Set-ItemProperty -Path $wallpaperStyleRegPath -Name TileWallpaper -Value "0"
 
 [Wallpaper]::SystemParametersInfo(20, 0, $path, 3)
 
