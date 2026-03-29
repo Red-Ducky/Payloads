@@ -38,7 +38,7 @@ if ($answer1 -eq [System.Windows.Forms.DialogResult]::Yes) {
 }
 if ($answer1 -ne [System.Windows.Forms.DialogResult]::Yes) {
     [System.Windows.Forms.MessageBox]::Show(
-        "T'es serieux ou quoi ? Bon vu que tu m'as enerve on va dire que tu voulais bien ! Admire ça !",
+        "T'es serieux ou quoi ? Bon vu que tu m'as enerve on va dire que tu voulais bien ! Admire ca !",
         "Peureux !",
         [System.Windows.Forms.MessageBoxButtons]::OK,
         [System.Windows.Forms.MessageBoxIcon]::Question
@@ -64,7 +64,7 @@ if ($ready -eq $false) {
 
             if ($answer2 -ne [System.Windows.Forms.DialogResult]::Yes) {
                 [System.Windows.Forms.MessageBox]::Show(
-                    "T'es serieux ou quoi ? Bon vu que tu m'as enerve on va dire que tu voulais bien ! Admire ça !",
+                    "T'es serieux ou quoi ? Bon vu que tu m'as enerve on va dire que tu voulais bien ! Admire ca !",
                     "Peureux !",
                     [System.Windows.Forms.MessageBoxButtons]::OK,
                     [System.Windows.Forms.MessageBoxIcon]::Warning
