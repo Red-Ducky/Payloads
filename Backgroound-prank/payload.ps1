@@ -20,7 +20,7 @@ Start-Sleep -Milliseconds 500
 $ready = $false
 
 $answer1 = [System.Windows.Forms.MessageBox]::Show(
-    "Est-tu vraiment sûr de continuer ?",
+    "Est-tu vraiment sur de continuer ?",
     "Alerte",
     [System.Windows.Forms.MessageBoxButtons]::YesNo,
     [System.Windows.Forms.MessageBoxIcon]::Question
@@ -38,7 +38,7 @@ if ($answer1 -eq [System.Windows.Forms.DialogResult]::Yes) {
 }
 if ($answer1 -ne [System.Windows.Forms.DialogResult]::Yes) {
     [System.Windows.Forms.MessageBox]::Show(
-        "T'es sérieux ou quoi ? Bon vu que tu m'as énervé on va dire que tu voulais bien ! Admire ça !",
+        "T'es serieux ou quoi ? Bon vu que tu m'as enerve on va dire que tu voulais bien ! Admire ça !",
         "Peureux !",
         [System.Windows.Forms.MessageBoxButtons]::OK,
         [System.Windows.Forms.MessageBoxIcon]::Question
@@ -64,7 +64,7 @@ if ($ready -eq $false) {
 
             if ($answer2 -ne [System.Windows.Forms.DialogResult]::Yes) {
                 [System.Windows.Forms.MessageBox]::Show(
-                    "T'es sérieux ou quoi ? Bon vu que tu m'as énervé on va dire que tu voulais bien ! Admire ça !",
+                    "T'es serieux ou quoi ? Bon vu que tu m'as enerve on va dire que tu voulais bien ! Admire ça !",
                     "Peureux !",
                     [System.Windows.Forms.MessageBoxButtons]::OK,
                     [System.Windows.Forms.MessageBoxIcon]::Warning
