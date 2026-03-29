@@ -112,7 +112,7 @@ Stop-Process -Name explorer -Force
 Start-Process explorer
 
 [System.Windows.Forms.MessageBox]::Show(
-    "Félicitations ! Tu viens de détruire ton ordinateur... Amuses-toi bien !",
+    "Felicitations ! Tu viens de detruire ton ordinateur... Amuses-toi bien !",
     "HAHA",
     [System.Windows.Forms.MessageBoxButtons]::OK,
     [System.Windows.Forms.MessageBoxIcon]::Warning
