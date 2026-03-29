@@ -19,7 +19,7 @@ Start-Sleep -Milliseconds 500
 
 $path = "$env:TEMP\screenshot.png"
 
-$bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+$bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
 
 $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
@@ -30,6 +30,10 @@ $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
 
 $graphics.Dispose()
 $bitmap.Dispose()
+
+$regPath = "HKCU:\Control Panel\Desktop"
+Set-ItemProperty -Path $regPath -Name WallpaperStyle -Value "10"
+Set-ItemProperty -Path $regPath -Name TileWallpaper -Value "0"
 
 Add-Type @"
 using System.Runtime.InteropServices;
