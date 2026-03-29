@@ -5,7 +5,7 @@ Start-Sleep -Milliseconds 500
 
 $path = "$env:TEMP\screenshot.png"
 
-$bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+$bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
 
 $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
@@ -24,6 +24,11 @@ public class Wallpaper {
     public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
 }
 "@
+
+$wallpaperStyleRegPath = "HKCU:\Control Panel\Desktop"
+
+Set-ItemProperty -Path $wallpaperStyleRegPath -Name WallpaperStyle -Value "10"
+Set-ItemProperty -Path $wallpaperStyleRegPath -Name TileWallpaper -Value "0"
 
 [Wallpaper]::SystemParametersInfo(20, 0, $path, 3)
 
