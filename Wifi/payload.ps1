@@ -32,7 +32,7 @@ $remplacement = '"```\n' + $texteEchappe + '\n```"'
 
 $payload = [ordered]@{
     embeds   = @(@{
-        title  = "Nouvelle entrée"
+        title  = "Nouvelles infos"
         color  = 3447003
         fields = @(
             @{ name = "Machine";     value = $machine;     inline = $true  }
