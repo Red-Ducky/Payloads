@@ -22,7 +22,15 @@ if ($remote.agent_version -ne $local.agent_version) {
     }
 
     $remote | ConvertTo-Json | Set-Content $localPath
-    Start-Process powershell -ArgumentList "-NonInteractive -WindowStyle Hidden -File `"$(Join-Path $scriptDir 'agent.ps1')`""
+    $agentPath = Join-Path $scriptDir "agent.ps1"
+    $vbsPath = Join-Path $scriptDir "launcher.vbs"
+
+@"
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$agentPath""", 0, False
+"@ | Set-Content $vbsPath
+
+    Start-Process wscript.exe -ArgumentList "`"$vbsPath`""
     exit
 }
 
