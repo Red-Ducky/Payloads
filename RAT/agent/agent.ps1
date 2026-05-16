@@ -15,16 +15,22 @@ if (Test-Path $localPath) {
 }
 
 if ($remote.agent_version -ne $local.agent_version) {
-    Invoke-WebRequest -Uri "$baseUrl`agent.ps1" -OutFile (Join-Path $scriptDir "agent.ps1")
+    Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $scriptDir "agent.ps1")
 
     $remote | ConvertTo-Json | Set-Content $localPath
 
-    Start-Process powershell -ArgumentList "-File `"$(Join-Path $scriptDir 'agent.ps1')`""
+    Start-Process powershell -ArgumentList "-WindowStyle Hidden -File `"$(Join-Path $scriptDir 'agent.ps1')`""
     exit
 }
 
 foreach ($remoteFile in $remote.files) {
+    
+    Write-Host "Vérification : $($remoteFile.name)"
+
     $localFile = $local.files | Where-Object { $_.name -eq $remoteFile.name }
+
+    Write-Host "Local trouvé : $localFile"
+
     if (-not $localFile -or $localFile.version -ne $remoteFile.version) {
         Invoke-WebRequest -Uri "$baseUrl$($remoteFile.name)" -OutFile (Join-Path $scriptDir $remoteFile.name)
     }
