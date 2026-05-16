@@ -1,7 +1,7 @@
 {
     "agent_version": "1.0.0",
     "files": [
-        {"name": "player.py", "version": "1.0.0"}
+        {"name": "player.py", "version": "1.0.0"},
         {"name": "fah.mp3", "version": "1.0.0"}
     ]
 }
