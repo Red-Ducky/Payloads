@@ -3,8 +3,15 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import tkinter as tk
-import vlc
 import time
+import os
+import sys
+
+vlc_path = os.path.join(os.path.dirname(__file__), "vlc")
+os.add_dll_directory(vlc_path)
+os.environ["PYTHON_VLC_LIB_PATH"] = os.path.join(vlc_path, "libvlc.dll")
+
+import vlc
 
 def set_windows_volume(percent):
     devices = AudioUtilities.GetSpeakers()
