@@ -60,9 +60,9 @@ $vlcDir = Join-Path $scriptDir "vlc"
 
 if (-not (Test-Path $vlcDir)) {
     $vlcZip = Join-Path $env:TEMP "vlc.zip"
-    Invoke-WebRequest -Uri "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.zip" -OutFile $vlcZip
+    Invoke-WebRequest -Uri "https://download.videolan.org/vlc/3.0.20/win64/vlc-3.0.20-win64.zip" -OutFile $vlcZip
     Expand-Archive -Path $vlcZip -DestinationPath $env:TEMP -Force
-    Move-Item -Path (Join-Path $env:TEMP "vlc-3.0.21") -Destination $vlcDir
+    Move-Item -Path (Join-Path $env:TEMP "vlc-3.0.20") -Destination $vlcDir
     Remove-Item $vlcZip
 }
 
