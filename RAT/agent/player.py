@@ -8,8 +8,15 @@ import os
 import sys
 
 vlc_path = os.path.join(os.path.dirname(__file__), "vlc")
-os.add_dll_directory(vlc_path)
-os.environ["PYTHON_VLC_LIB_PATH"] = os.path.join(vlc_path, "libvlc.dll")
+
+if os.path.exists(vlc_path):
+    os.add_dll_directory(vlc_path)
+    os.environ["PYTHON_VLC_LIB_PATH"] = os.path.join(vlc_path, "libvlc.dll")
+else:
+    system_vlc = r"C:\Program Files\VideoLAN\VLC"
+    if os.path.exists(system_vlc):
+        os.add_dll_directory(system_vlc)
+        os.environ["PYTHON_VLC_LIB_PATH"] = os.path.join(system_vlc, "libvlc.dll")
 
 import vlc
 
