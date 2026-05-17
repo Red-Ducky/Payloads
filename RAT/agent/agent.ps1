@@ -105,10 +105,13 @@ while ($ws.State -eq "Open") {
             $cmd = $message | ConvertFrom-Json
 
             if ($cmd.type -eq "play_video" -or $cmd.type -eq "play_sound") {
-                if ($cmd.type -eq "play_video") { $mode = "video" }
-                else { $mode = "sound" }
-                
-                Start-Process python -ArgumentList "$playerPath --file $($cmd.file) --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
+                if ($cmd.type -eq "play_video") {
+                    $mode = "video"
+                    Start-Process python -ArgumentList "$playerPath --file $($cmd.file).mp4 --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
+                } else {
+                    $mode = "sound"
+                    Start-Process python -ArgumentList "$playerPath --file $($cmd.file).mp3 --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
+                }
             }
 
             elseif ($cmd.type -eq "kill") {
