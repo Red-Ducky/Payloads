@@ -1,7 +1,8 @@
 import argparse
 from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from comtypes import CLSCTX_ALL, CoCreateInstance
+from comtypes.GUID import GUID
+import comtypes
 import tkinter as tk
 import time
 import os
@@ -21,8 +22,11 @@ else:
 import vlc
 
 def set_windows_volume(percent):
+    from comtypes import CoInitialize
+    CoInitialize()
+    from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
     devices = AudioUtilities.GetSpeakers()
-    interface = devices._dev.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
     volume = cast(interface, POINTER(IAudioEndpointVolume))
     volume.SetMasterVolumeLevelScalar(percent / 100, None)
     volume.SetMute(0, None)
