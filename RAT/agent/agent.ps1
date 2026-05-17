@@ -151,11 +151,21 @@ while ($ws.State -eq "Open") {
                 $bitmap.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
                 $bytes = $ms.ToArray()
                 $base64 = [Convert]::ToBase64String($bytes)
+                $chunkSize = 500000
+                $chunks = [Math]::Ceiling($base64.Length / $chunkSize)
 
-                $payload = @{ type = "screenshot_data"; data = $base64 } | ConvertTo-Json
-                $payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
-                $payloadSegment = [System.ArraySegment[byte]]::new($payloadBytes)
-                $ws.SendAsync($payloadSegment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
+                for ($i = 0; $i -lt $chunks; $i++) {
+                    $chunk = $base64.Substring($i * $chunkSize, [Math]::Min($chunkSize, $base64.Length - $i * $chunkSize))
+                    $payload = @{ 
+                        type = "screenshot_chunk"
+                        data = $chunk
+                        index = $i
+                        total = $chunks
+                    } | ConvertTo-Json
+                    $payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
+                    $payloadSegment = [System.ArraySegment[byte]]::new($payloadBytes)
+                    $ws.SendAsync($payloadSegment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
+                }
             }
 
         } catch {
