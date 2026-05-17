@@ -39,7 +39,12 @@ objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolic
 foreach ($remoteFile in $remote.files) {
     $localFile = $local.files | Where-Object { $_.name -eq $remoteFile.name }
     if (-not $localFile -or $localFile.version -ne $remoteFile.version) {
-        Invoke-WebRequest -Uri ($baseUrl + $remoteFile.name) -OutFile (Join-Path $scriptDir $remoteFile.name)
+        $destPath = Join-Path $scriptDir $remoteFile.name
+        $destDir = Split-Path $destPath -Parent
+        if (-not (Test-Path $destDir)) {
+            New-Item -ItemType Directory -Force -Path $destDir
+        }
+        Invoke-WebRequest -Uri ($baseUrl + $remoteFile.name) -OutFile $destPath
     }
 }
 $remote | ConvertTo-Json | Set-Content $localPath
@@ -107,11 +112,13 @@ while ($ws.State -eq "Open") {
             if ($cmd.type -eq "play_video" -or $cmd.type -eq "play_sound") {
                 if ($cmd.type -eq "play_video") {
                     $mode = "video"
-                    Start-Process python -ArgumentList "$playerPath --file $($cmd.file).mp4 --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
+                    $filePath = Join-Path $scriptDir "media\$($cmd.file).mp4"
                 } else {
                     $mode = "sound"
-                    Start-Process python -ArgumentList "$playerPath --file $($cmd.file).mp3 --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
+                    $filePath = Join-Path $scriptDir "media\$($cmd.file).mp3"
                 }
+
+                Start-Process python -ArgumentList "$playerPath --file `"$filePath`" --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
             }
 
             elseif ($cmd.type -eq "kill") {
