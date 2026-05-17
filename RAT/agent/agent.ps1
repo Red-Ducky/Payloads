@@ -20,9 +20,16 @@ if ($remote.agent_version -ne $local.agent_version) {
     Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $scriptDir "agent.ps1")
 
     foreach ($remoteFile in $remote.files) {
-        Invoke-WebRequest -Uri ($baseUrl + $remoteFile.name) -OutFile (Join-Path $scriptDir $remoteFile.name)
+        $localFile = $local.files | Where-Object { $_.name -eq $remoteFile.name }
+        if (-not $localFile -or $localFile.version -ne $remoteFile.version) {
+            $destPath = Join-Path $scriptDir $remoteFile.name
+            $destDir = Split-Path $destPath -Parent
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Force -Path $destDir
+            }
+            Invoke-WebRequest -Uri ($baseUrl + $remoteFile.name) -OutFile $destPath
+        }
     }
-
     $remote | ConvertTo-Json | Set-Content $localPath
     $agentPath = Join-Path $scriptDir "agent.ps1"
     $vbsPath = Join-Path $scriptDir "launcher.vbs"
