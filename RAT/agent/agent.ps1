@@ -54,7 +54,7 @@ if (-not $python) {
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
 }
 
-python -m pip install python-vlc pycaw comtypes --quiet --exists-action i
+python -m pip install python-vlc "pycaw==20230322" comtypes --quiet --exists-action i
 
 $vlcDir = Join-Path $scriptDir "vlc"
 
