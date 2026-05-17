@@ -8,6 +8,8 @@ $remote = Invoke-RestMethod -Uri $versionUrl
 
 $localPath = Join-Path $scriptDir "version.json"
 
+##### Updates #####
+
 if (Test-Path $localPath) {
     $local = Get-Content $localPath | ConvertFrom-Json
 } else {
@@ -41,6 +43,30 @@ foreach ($remoteFile in $remote.files) {
     }
 }
 $remote | ConvertTo-Json | Set-Content $localPath
+
+$python = Get-Command python -ErrorAction SilentlyContinue
+
+if (-not $python) {
+    $pythonInstaller = Join-Path $env:TEMP "python_installer.exe"
+    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -OutFile $pythonInstaller
+    Start-Process $pythonInstaller -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1" -Wait
+
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+}
+
+python -m pip install python-vlc pycaw comtypes --quiet --exists-action i
+
+$vlcDir = Join-Path $scriptDir "vlc"
+
+if (-not (Test-Path $vlcDir)) {
+    $vlcZip = Join-Path $env:TEMP "vlc.zip"
+    Invoke-WebRequest -Uri "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.zip" -OutFile $vlcZip
+    Expand-Archive -Path $vlcZip -DestinationPath $env:TEMP -Force
+    Move-Item -Path (Join-Path $env:TEMP "vlc-3.0.21") -Destination $vlcDir
+    Remove-Item $vlcZip
+}
+
+##### Main #####
 
 $infos = @{
     hostname = $env:COMPUTERNAME
