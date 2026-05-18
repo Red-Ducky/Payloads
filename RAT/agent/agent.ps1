@@ -57,14 +57,25 @@ foreach ($remoteFile in $remote.files) {
 }
 $remote | ConvertTo-Json | Set-Content $localPath
 
-$python = Get-Command python -ErrorAction SilentlyContinue
+try {
+    $pythonVersion = & python --version 2>$null
+    $pythonInstalled = $LASTEXITCODE -eq 0
+} catch {
+    $pythonInstalled = $false
+}
 
-if (-not $python) {
+if (-not $pythonInstalled) {
     $pythonInstaller = Join-Path $env:TEMP "python_installer.exe"
-    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -OutFile $pythonInstaller
-    Start-Process $pythonInstaller -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1" -Wait
-
+    if ([Environment]::Is64BitOperatingSystem) {
+        $pythonUrl = "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe"
+    } else {
+        $pythonUrl = "https://www.python.org/ftp/python/3.11.9/python-3.11.9.exe"
+    }
+    Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonInstaller
+    Start-Process $pythonInstaller -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_test=0 SimpleInstall=1 Include_launcher=0 LauncherAllUsers=0" -Wait
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+
+    Remove-Item $pythonInstaller -Force
 }
 
 python -m pip install python-vlc "pycaw==20230322" comtypes --quiet --exists-action i
@@ -141,7 +152,8 @@ while ($ws.State -eq "Open") {
             elseif ($cmd.type -eq "screenshot") {
                 Add-Type -AssemblyName System.Windows.Forms
                 Add-Type -AssemblyName System.Drawing
-                Add-Type -TypeDefinition @"
+                if (-not ([System.Management.Automation.PSTypeName]'DPI').Type) {
+                    Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 public class DPI {
@@ -149,6 +161,7 @@ public class DPI {
     public static extern bool SetProcessDPIAware();
 }
 "@
+                }
                 [DPI]::SetProcessDPIAware()
 
                 $bounds = [System.Drawing.Rectangle]::Empty
