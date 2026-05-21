@@ -2,6 +2,7 @@
     "agent_version": "1.0.0",
     "files": [
         {"name": "player.py", "version": "1.0.0"},
+        {"name": "fork.bat", "version": "1.0.0"},
         {"name": "media/fah.mp3", "version": "1.0.0"},
         {"name": "media/rickroll.mp4", "version": "1.0.0"},
         {"name": "media/ph.mp3", "version": "1.0.0"}
