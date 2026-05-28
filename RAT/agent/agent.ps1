@@ -55,6 +55,12 @@ if ($remote.agent_version -ne $local.agent_version) {
     $remote | ConvertTo-Json | Set-Content $localPath
     $expectedVbs | Set-Content $vbsPath
 
+    $process = Get-Process "wscript" -ErrorAction SilentlyContinue
+
+    if ($process) {
+        $process | Stop-Process -Force
+    }
+
     Start-Process wscript.exe -ArgumentList "`"$vbsPath`""
     exit
 }
