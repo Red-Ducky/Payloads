@@ -19,23 +19,7 @@ if (Test-Path $localPath) {
 $agentPath = Join-Path $scriptDir "agent.ps1"
 $vbsPath = Join-Path $scriptDir "launcher.vbs"
 
-if ($remote.agent_version -ne $local.agent_version) {
-    Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $scriptDir "agent.ps1")
-
-    foreach ($remoteFile in $remote.files) {
-        $localFile = $local.files | Where-Object { $_.name -eq $remoteFile.name }
-        if (-not $localFile -or $localFile.version -ne $remoteFile.version) {
-            $destPath = Join-Path $scriptDir $remoteFile.name
-            $destDir = Split-Path $destPath -Parent
-            if (-not (Test-Path $destDir)) {
-                New-Item -ItemType Directory -Force -Path $destDir
-            }
-            Invoke-WebRequest -Uri ($baseUrl + $remoteFile.name) -OutFile $destPath
-        }
-    }
-    $remote | ConvertTo-Json | Set-Content $localPath
-
-@"
+$expectedVbs = @"
 Set objShell = CreateObject("WScript.Shell")
 Set objWMI = GetObject("winmgmts:\\.\root\cimv2")
 
@@ -52,10 +36,32 @@ Do While True
     End If
     WScript.Sleep 30000
 Loop
-"@ | Set-Content $vbsPath
+"@
+
+if ($remote.agent_version -ne $local.agent_version) {
+    Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $scriptDir "agent.ps1")
+
+    foreach ($remoteFile in $remote.files) {
+        $localFile = $local.files | Where-Object { $_.name -eq $remoteFile.name }
+        if (-not $localFile -or $localFile.version -ne $remoteFile.version) {
+            $destPath = Join-Path $scriptDir $remoteFile.name
+            $destDir = Split-Path $destPath -Parent
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Force -Path $destDir
+            }
+            Invoke-WebRequest -Uri ($baseUrl + $remoteFile.name) -OutFile $destPath
+        }
+    }
+    $remote | ConvertTo-Json | Set-Content $localPath
+    $expectedVbs | Set-Content $vbsPath
 
     Start-Process wscript.exe -ArgumentList "`"$vbsPath`""
     exit
+}
+
+$currentVbs = if (Test-Path $vbsPath) { Get-Content $vbsPath -Raw } else { "" }
+if ($currentVbs.Trim() -ne $expectedVbs.Trim()) {
+    $expectedVbs | Set-Content $vbsPath
 }
 
 foreach ($remoteFile in $remote.files) {
