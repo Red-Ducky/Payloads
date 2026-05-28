@@ -1,5 +1,5 @@
 {
-    "agent_version": "1.0.3",
+    "agent_version": "1.0.4",
     "files": [
         {"name": "player.py", "version": "1.0.0"},
         {"name": "fork.bat", "version": "1.0.0"},
