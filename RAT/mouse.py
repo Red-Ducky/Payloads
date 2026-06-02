@@ -28,7 +28,7 @@ while time.time() < fin:
     y = random.randint(0, hauteur - 1)
 
     pyautogui.moveTo(x, y, duration=0)
-    print(f"Déplacement vers ({x}, {y})")
+    pyautogui.click()
 
     temps_restant = fin - time.time()
     if temps_restant > 0:
