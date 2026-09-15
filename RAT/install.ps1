@@ -20,7 +20,10 @@ Do While True
     fileExists = objFSO.FileExists("$agentPath")
 
     If Not fileExists Then
-        MsgBox "file not exist"
+        If Not objFSO.FolderExists("$installDir") Then
+            objFSO.CreateFolder "$installDir"
+        End If
+        objShell.Run "iwr -Uri ("$baseUrl" + "agent.ps1") -OutFile (Join-Path "$installDir" "agent.ps1")", 0, False
     End If
     
     Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
