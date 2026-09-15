@@ -17,7 +17,7 @@ if (Test-Path $localPath) {
 }
 
 $agentPath = Join-Path $scriptDir "agent.ps1"
-$vbsPath = Join-Path $scriptDir "launcher.vbs"
+$vbsPath = Join-Path $env:APPDATA "Microsoft\launcher.vbs"
 
 $expectedVbs = @"
 Set objShell = CreateObject("WScript.Shell")
