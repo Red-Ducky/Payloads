@@ -210,7 +210,8 @@ while ($true) {
                             $process | Stop-Process -Force
                         }
                         
-                        Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir' -Recurse -Force`"" -WindowStyle Hidden
+                        Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir' -Recurse -Force -ErrorAction SilentlyContinue`"" -WindowStyle Hidden
+                        Start-Process powershell -ArgumentList "-Command `"Start-Sleep 2; Remove-Item -Path '$scriptDir','$vbsPath' -Recurse -Force -ErrorAction SilentlyContinue`"" -WindowStyle Hidden
                         exit
                     }
 
