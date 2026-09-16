@@ -23,7 +23,7 @@ Do While True
         If Not objFSO.FolderExists("$installDir") Then
             objFSO.CreateFolder "$installDir"
         End If
-        objShell.Run "iwr -Uri ("$baseUrl" + "agent.ps1") -OutFile (Join-Path "$installDir" "agent.ps1")", 0, False
+        objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command ""Invoke-WebRequest -Uri '${baseUrl}agent.ps1' -OutFile '$installDir\agent.ps1'""", 0, False
     End If
     
     Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
