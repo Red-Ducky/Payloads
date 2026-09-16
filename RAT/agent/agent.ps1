@@ -38,16 +38,20 @@ Do While True
     Set processes = objWMI.ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'powershell.exe'")
     
     agentCount = 0
-
+    firstProcessId = 0
+    
     For Each process In processes
         If InStr(1, process.CommandLine, "agent.ps1", vbTextCompare) > 0 Then
+    
             agentCount = agentCount + 1
+    
+            If firstProcessId = 0 Then
+                firstProcessId = process.ProcessId
+            Else
+                process.Terminate()
+            End If
         End If
     Next
-
-    If agentCount > 1 Then
-        MsgBox "Doublons !"
-    End If
 
     If agentCount = 0 Then
         objShell.Run "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File ""$agentPath""", 0, False
